@@ -1,0 +1,3 @@
+bazel-out/x64_windows-fastbuild/bin/telemetry-app/_objs/telemetry-app/main.obj
+bazel-out/x64_windows-fastbuild/bin/lib/telemetry-utility.lib
+/DEFAULTLIB:msvcrt.lib

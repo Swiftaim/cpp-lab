@@ -1,0 +1,4 @@
+/nologo
+/OUT:bazel-out/x64_windows-fastbuild/bin/lib/telemetry-utility.lib
+bazel-out/x64_windows-fastbuild/bin/lib/_objs/telemetry-utility/telemetry-utility.obj
+/ignore:4221
