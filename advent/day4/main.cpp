@@ -5,6 +5,9 @@
 #include <vector>
 #include <unordered_map>
 
+// guardId has map of [minutes : count]
+using SleepLog_t = std::unordered_map<int, std::unordered_map<int, int>>;
+
 enum class Event
 {
     ASLEEP = 0,
@@ -122,9 +125,57 @@ Record parse(const std::string& data)
     return record;
 }
 
-int main(int argc, char* argv[])
+std::pair<int, int> sleepyMinute(SleepLog_t& sleepLog, int guardId)
 {
-    std::ifstream file(argv[1]);
+    int sleepyminute = -1;
+    int maxrepeats = -1;
+    const auto& guardSleepLog = sleepLog[guardId];
+    for (const auto& p : guardSleepLog)
+    {
+        if (p.second > maxrepeats)
+        {
+            sleepyminute = p.first;
+            maxrepeats = p.second;
+        }
+    }
+    return std::make_pair(sleepyminute, maxrepeats);
+}
+
+std::pair<int, int> mostSleepyMinute(SleepLog_t& sleepLog)
+{
+    struct GuardMostSleepyMinute {
+        int guardId;
+        int minute;
+        int count;
+        bool operator<(const GuardMostSleepyMinute& g) const { return count < g.count; }
+    };
+    std::vector<GuardMostSleepyMinute> sleepyMinutes;
+
+    int mostSleepyMinute = -1;
+    int count = -1;
+    int chosenGuard = -1;
+    for (const auto& guard : sleepLog)
+    {
+        auto sleepy = sleepyMinute(sleepLog, guard.first);
+        sleepyMinutes.push_back({guard.first, sleepy.first, sleepy.second});
+        if (sleepy.second > count)
+        {
+            count = sleepy.second;
+            mostSleepyMinute = sleepy.first;
+            chosenGuard = guard.first;
+        }
+    }
+    std::sort(sleepyMinutes.begin(), sleepyMinutes.end());
+    for (auto& e : sleepyMinutes)
+    {
+        std::cout << "#" << e.guardId << ", minute: " << e.minute << ", " << e.count << std::endl;
+    }
+    return std::make_pair(chosenGuard, mostSleepyMinute);
+}
+
+void solution(const char* path)
+{
+    std::ifstream file(path);
     std::string line;
     std::vector<Record> records;
     while (std::getline(file, line)) {
@@ -132,8 +183,8 @@ int main(int argc, char* argv[])
     }
     std::sort(records.begin(), records.end(), Record::compare);
     
-    // guards an their sleep times
-    std::unordered_map<int, std::unordered_map<int, int>> asleep;
+    // guards and their sleep times
+    SleepLog_t sleepLog;
     int asleeptime = -1;
     int guard = -1;
     for (const auto& r : records)
@@ -149,40 +200,35 @@ int main(int argc, char* argv[])
             assert(asleeptime > -1);
             int wokeuptime = r.time.minute;
             for (int t = asleeptime; t < wokeuptime; ++t)
-                asleep[guard][t] += 1;
+                sleepLog[guard][t] += 1;
             asleeptime = -1;
         }
     }
 
     int maxsleeptime = 0;
     int selectedguard = -1;
-    for (const auto& guardsleep : asleep)
+    for (const auto& guardsleep : sleepLog)
     {
         int minutes = 0;
         const auto& asleepMap = guardsleep.second;
         for (const auto& p : asleepMap)
             minutes += p.second;
-        std::cout << "guard #" << guardsleep.first << " asleep " << minutes << std::endl;
         if (minutes > maxsleeptime)
         {
             maxsleeptime = minutes;
             selectedguard = guardsleep.first;
         }
     }
-    std::cout << "Guard #" << selectedguard << " slept for " << maxsleeptime << " minutes" << std::endl;
 
-    int sleepyminute = -1;
-    int maxrepeats = 0;
-    const auto& guardSleepLog = asleep[selectedguard];
-    for (const auto& p : guardSleepLog)
-    {
-        if (p.second > maxrepeats)
-        {
-            sleepyminute = p.first;
-            maxrepeats = p.second;
-        }
-    }
+    int sleepy = sleepyMinute(sleepLog, selectedguard).first;
+    std::cout << "Part One - Chosen guard: #" << selectedguard << ", chosen minute: " << sleepy << "; Answer: " << selectedguard * sleepy << std::endl;
 
-    std::cout << "Chosen guard: #" << selectedguard << ", chosen minute: " << sleepyminute << "; Answer: " << selectedguard * sleepyminute << std::endl;
+    auto mostSleepy = mostSleepyMinute(sleepLog);
+    std::cout << "Part Two - Chosen guard: #" << mostSleepy.first << ", chosen minute: " << mostSleepy.second << "; Answer: " << mostSleepy.first * mostSleepy.second << std::endl;
+}
+
+int main(int argc, char* argv[])
+{
+    solution(argv[1]);
     return 0;
 }
