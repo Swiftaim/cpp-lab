@@ -41,11 +41,19 @@ public:
         for (size_t i = 0; i < cut; ++i)
         {
             x.push_back(a[i]);
-            y.push_back(b[i]);
         }
         for (size_t i = cut; i < len; ++i)
         {
             x.push_back(b[i]);
+        }
+
+        cut = cut_dist(generator);
+        for (size_t i = 0; i < cut; ++i)
+        {
+            y.push_back(b[i]);
+        }
+        for (size_t i = cut; i < len; ++i)
+        {
             y.push_back(a[i]);
         }
         return std::make_pair(x, y);

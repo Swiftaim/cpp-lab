@@ -3,13 +3,14 @@
 #include <array>
 #include <iostream>
 #include <iterator>
+#include <exception>
 
-template<typename T, size_t N>
-std::array<T, N> range() 
+template<size_t START, size_t STOP, size_t step=1>
+std::array<size_t, (1>=(STOP-START)/step?1:(STOP-START)/step)> range() 
 {
-    std::array<T, N> a;
-    T value{};
-    for (size_t i = 0; i < N; ++i) a[i] = T{value++};
+    std::array<size_t, (1>=(STOP-START)/step?1:(STOP-START)/step)> a;
+    size_t index = 0;
+    for (size_t i = START; i < STOP; i+=step) { a[index] = i; ++index; }
     return a;
 }
 
@@ -26,7 +27,7 @@ int main(int argc, char const *argv[])
         return e.first + " : " + e.second;
     });
 
-    for (auto e : range<int, 10>())
+    for (auto e : range<0,5>())
         std::cout << e / 2 << ", ";
 
     std::cout << std::endl;

@@ -1,7 +1,6 @@
 cc_binary(
-    name = "ga",
+    name = "template",
     srcs = [
         "main.cpp",
-        "include/GA.h",
     ],
 )

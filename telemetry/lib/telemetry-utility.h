@@ -5,7 +5,11 @@
 #include <unordered_map>
 #include <vector>
 
-#define FB_API __declspec(dllexport)
+#ifdef _WIN32
+    #define FB_API __declspec(dllexport)
+#else
+    #define FB_API
+#endif
 
 namespace fb
 {
@@ -79,6 +83,9 @@ public:
 	/// Harvest the pipeline startup telemetry event. May only be called once
 	FB_API static DbObject collect()
     {
+        if (StartupTelemetry::s_hasBeenCollected)
+            return DbObject();
+        StartupTelemetry::s_hasBeenCollected = true;
         return s_builder.done();
     }
 
